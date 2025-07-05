@@ -34,7 +34,7 @@ async def temperature_exists(db: AsyncSession, city_id: int, date_time) -> bool:
 
 
 async def create_temperature(db: AsyncSession, data: TemperatureRequest):
-    if temperature_exists(db, data.city_id, data.date_time):
+    if await temperature_exists(db, data.city_id, data.date_time):
         return None
 
     temperature = build_temperature(data)
