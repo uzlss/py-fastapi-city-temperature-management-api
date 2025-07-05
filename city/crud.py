@@ -17,11 +17,18 @@ async def get_city_by_id(db: AsyncSession, id: int):
     return result.scalar_one_or_none()
 
 
-async def create_city(db: AsyncSession, data: CityRequest):
-    query = insert(City).values(**data.model_dump()).returning(City)
+async def get_city_by_name(db: AsyncSession, name: str):
+    query = select(City).where(City.name == name)
     result = await db.execute(query)
+    return result.scalar_one_or_none()
+
+
+async def create_city(db: AsyncSession, data: CityRequest):
+    city = City(**data.model_dump())
+    db.add(city)
     await db.commit()
-    return result.scalar_one()
+    await db.refresh(city)
+    return city
 
 
 async def delete_city(db: AsyncSession, id: int):
