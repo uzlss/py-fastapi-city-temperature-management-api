@@ -9,8 +9,10 @@ class CityBase(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class CityRequest(CityBase):
     pass
+
 
 class CityResponse(CityBase):
     id: int

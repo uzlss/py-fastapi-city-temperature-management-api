@@ -30,6 +30,7 @@ async def create_city(data: CityRequest, db: AsyncSession = Depends(get_db)):
     city = await crud.create_city(db, data)
     return CityResponse.model_validate(city)
 
+
 @city.delete("/{id}", status_code=204)
 async def delete_city(id: int, db: AsyncSession = Depends(get_db)):
     city = await crud.delete_city(db, id)
