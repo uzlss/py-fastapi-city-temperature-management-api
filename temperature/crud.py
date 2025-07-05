@@ -1,6 +1,7 @@
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import select, Result
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -23,7 +24,19 @@ def build_temperature(data: TemperatureRequest) -> Temperature:
     return Temperature(**data.model_dump())
 
 
+async def temperature_exists(db: AsyncSession, city_id: int, date_time) -> bool:
+    result = await db.execute(
+        select(Temperature).where(
+            Temperature.city_id == city_id, Temperature.date_time == date_time
+        )
+    )
+    return result.scalar_one_or_none() is not None
+
+
 async def create_temperature(db: AsyncSession, data: TemperatureRequest):
+    if temperature_exists(db, data.city_id, data.date_time):
+        return None
+
     temperature = build_temperature(data)
     db.add(temperature)
     await db.commit()
@@ -31,12 +44,22 @@ async def create_temperature(db: AsyncSession, data: TemperatureRequest):
     return temperature
 
 
-async def create_temperatures(
-    db: AsyncSession, data_list: List[TemperatureRequest]
-):
-    temperatures = [build_temperature(data) for data in data_list]
+async def create_temperatures(db: AsyncSession, data_list: List[TemperatureRequest]):
+    temperatures = []
+    for data in data_list:
+        if await temperature_exists(db, data.city_id, data.date_time):
+            continue
+        temperatures.append(build_temperature(data))
+
     db.add_all(temperatures)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise ValueError(
+            "One or more duplicate entries detected by database constraint."
+        )
+
     for temp in temperatures:
         await db.refresh(temp)
     return temperatures

@@ -11,12 +11,15 @@ class TemperatureBase(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class TemperatureRequest(TemperatureBase):
     city_id: int
+
 
 class TemperatureResponse(TemperatureBase):
     id: int
     city_id: int
+
 
 class TemperatureDetailResponse(TemperatureBase):
     id: int

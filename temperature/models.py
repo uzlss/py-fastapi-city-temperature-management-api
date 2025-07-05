@@ -1,4 +1,11 @@
-from sqlalchemy import Column, Integer, Float, ForeignKey, DateTime
+from sqlalchemy import (
+    Column,
+    Integer,
+    Float,
+    ForeignKey,
+    DateTime,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -12,3 +19,5 @@ class Temperature(Base):
     temperature = Column(Float, nullable=False)
 
     city = relationship("City", back_populates="temperatures")
+
+    __table_args__ = (UniqueConstraint("city_id", "date_time", name="uix_city_date"),)
