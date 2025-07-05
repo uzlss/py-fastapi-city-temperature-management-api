@@ -2,13 +2,14 @@ from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from temperature.models import Temperature
 from temperature.schemas import TemperatureRequest
 
 
 async def get_temperature(db: AsyncSession, city_id: str | None = None):
-    query = select(Temperature)
+    query = select(Temperature).options(selectinload(Temperature.city))
 
     if city_id:
         query = query.where(Temperature.city_id == city_id)

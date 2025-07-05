@@ -18,6 +18,6 @@ class TemperatureResponse(TemperatureBase):
     id: int
     city_id: int
 
-class TemperatureDetailResponse(TemperatureResponse):
+class TemperatureDetailResponse(TemperatureBase):
     id: int
     city: CityResponse
